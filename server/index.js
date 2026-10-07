@@ -97,6 +97,33 @@ async function getExistingLabelKey(displayName) {
   }
 }
 
+// Wix rejects creating a contact whose email already exists. Returns the
+// existing contact's ID in that case, otherwise null.
+function getDuplicateContactId(error) {
+  const appError = error?.details?.applicationError;
+  if (appError?.code !== 'DUPLICATE_CONTACT_EXISTS') return null;
+  return appError?.data?.duplicateContactId ?? null;
+}
+
+// Writes the new extended fields (role, message) onto an existing contact,
+// leaving its name and email untouched.
+async function updateContactExtendedFields(contactId, items) {
+  const contact = await wixClient.contacts.getContact(contactId);
+
+  // Keep the contact's other custom fields in case Wix replaces the whole map.
+  const existingCustom = Object.fromEntries(
+    Object.entries(contact?.info?.extendedFields?.items ?? {}).filter(([key]) =>
+      key.startsWith('custom.')
+    )
+  );
+
+  return wixClient.contacts.updateContact(
+    contactId,
+    { extendedFields: { items: { ...existingCustom, ...items } } },
+    contact.revision
+  );
+}
+
 app.post('/api/subscribe', async (req, res) => {
   try {
     const { email, firstName, lastName, role, message } = req.body;
@@ -134,7 +161,19 @@ app.post('/api/subscribe', async (req, res) => {
       contactInfo.extendedFields.items['custom.message'] = messageForCrm;
     }
 
-    const response = await wixClient.contacts.createContact(contactInfo);
+    let response;
+    try {
+      response = await wixClient.contacts.createContact(contactInfo);
+    } catch (createError) {
+      const duplicateContactId = getDuplicateContactId(createError);
+      if (!duplicateContactId) throw createError;
+
+      // Returning subscriber: update their existing contact instead.
+      response = await updateContactExtendedFields(
+        duplicateContactId,
+        contactInfo.extendedFields.items
+      );
+    }
     const contactId = response?.contact?._id;
     if (!contactId) {
       throw new Error('Wix CRM did not return a contact ID.');
@@ -160,7 +199,7 @@ app.post('/api/subscribe', async (req, res) => {
       console.error('Error labeling contact:', labelError);
     }
 
-    console.log('Contact created successfully:', response);
+    console.log('Contact saved successfully:', response);
     res.json({ success: true, data: response });
   } catch (error) {
     console.error('Error creating contact:', error);
