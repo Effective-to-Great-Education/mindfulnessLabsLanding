@@ -115,6 +115,9 @@ export async function subscribeContact({ email, firstName, lastName, role, messa
     subscription: { email, subscriptionStatus: 'SUBSCRIBED' },
   });
 
+  // TEMP: Inbox posting disabled; Wix returns 403 on /inbox/v2/messages until the
+  // API key gets "Manage Inbox Messages". Uncomment once the key has it.
+  /*
   // Get (or start) the contact's Inbox conversation
   const { conversation } = await wix('POST', '/inbox/v2/conversations', {
     participantId: { contactId },
@@ -141,6 +144,7 @@ export async function subscribeContact({ email, firstName, lastName, role, messa
       },
     },
   });
+  */
 
   console.log('Contact saved successfully:', contactId);
   return contactId;
