@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { Instagram, Linkedin } from 'lucide-react'
 import './Contact.css'
 
+// Address shown when submitting fails, baked in at build time from .env / Netlify
+const FALLBACK_EMAIL = import.meta.env.VITE_FALLBACK_EMAIL
+
 function Contact() {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -141,7 +144,13 @@ function Contact() {
               <div className={`status-message ${status}`}>
                 {status === 'success'
                   ? 'Successfully subscribed to our mailing list!'
-                  : 'Error subscribing. Please try again.'}
+                  : (
+                    // On failure, point them to the fallback address instead of asking them to retry
+                    <>
+                      Something went wrong. Please email us directly at{' '}
+                      <a href={`mailto:${FALLBACK_EMAIL}`}>{FALLBACK_EMAIL}</a>.
+                    </>
+                  )}
               </div>
             )}
           </form>

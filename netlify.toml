@@ -5,7 +5,6 @@
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["@wix/api-client", "@wix/crm"]
   included_files = ["content/**"]
 
 [dev]

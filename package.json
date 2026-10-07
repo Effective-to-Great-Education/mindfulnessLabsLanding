@@ -12,10 +12,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1096.0",
-    "@wix/api-client": "^1.14.1",
-    "@wix/crm": "^1.0.0",
-    "@wix/sdk": "^1.21.2",
-    "@wix/stores": "^1.0.639",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
