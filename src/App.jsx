@@ -8,7 +8,8 @@ import Footer from './components/Footer'
 import './App.css'
 import WhySection from './components/WhySection'
 import OurStory from './components/OurStory'
-import ChatWidget from './components/ChatWidget'
+// TEMP: chat bot hidden while its backend is broken; restore this and <ChatWidget /> below
+// import ChatWidget from './components/ChatWidget'
 
 function App() {
   return (
@@ -21,7 +22,7 @@ function App() {
       <OurStory />
       <Contact />
       <Footer />
-      <ChatWidget />
+      {/* <ChatWidget /> */}
     </div>
   )
 }
